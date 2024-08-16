@@ -1,53 +1,55 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int N, M;
-int si, ti, ci;
-int stalls[101];
-vector<int> airconditions[11];
-
-bool isValid(vector<int> &arr){
-    for (int a: arr){
-        if (a != 0) return false;
+bool is_completely_cooled(const vector<int>& stall_temperatures) {
+    for (int temperature : stall_temperatures) {
+        if (temperature > 0) {
+            return false;
+        }
     }
     return true;
 }
 
-int main(){
-    cin >> N >> M;
-    for (int i = 0; i < N; i++){
-        cin >> si >> ti >> ci;
+int main() {
+    int number_of_heat_sources, number_of_air_conditioners;
+    cin >> number_of_heat_sources >> number_of_air_conditioners;
 
-        for (int j = si; j <= ti; j++)
-        stalls[j] = ci;
+    vector<int> stall_temperatures(101, 0);
+    for (int i = 0; i < number_of_heat_sources; ++i) {
+        int start_heat_source, end_heat_source, heat_level;
+        cin >> start_heat_source >> end_heat_source >> heat_level;
+        for (int stall = start_heat_source; stall <= end_heat_source; ++stall) {
+            stall_temperatures[stall] += heat_level;
+        }
     }
 
-    for (int i = 0; i < M; i++){
-        vector<int> tmp(4, 0);
-        cin >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3];
-        airconditions[i] = tmp;
+    vector<vector<int>> air_conditioners;
+    for (int i = 0; i < number_of_air_conditioners; ++i) {
+        int start_ac, end_ac, cooling_power, cost;
+        cin >> start_ac >> end_ac >> cooling_power >> cost;
+        air_conditioners.push_back({start_ac, end_ac, cooling_power, cost});
     }
 
-    int bnd = 1 << M;
-    int lowest_cost = INT_MAX;
+    int minimum_cost = INT_MAX;
+    int number_of_combinations = 1 << number_of_air_conditioners;
+    for (int combination = 0; combination < number_of_combinations; ++combination) {
+        vector<int> current_stall_temperatures(stall_temperatures);
+        int total_cost = 0;
 
-    for (int mask = 0; mask < bnd; mask++){
-        int current_cost = 0;
-        vector<int> copyOfStalls(stalls, stalls+101);
-
-        for (int i = 0; i < M; i++){
-            if (mask & (1 << i) == 0)
-            continue;
-            current_cost += airconditions[i][3];
-            for (int k = airconditions[i][0];  k <= airconditions[i][1]; k++){
-                copyOfStalls[k] -= airconditions[i][2];
+        for (int i = 0; i < number_of_air_conditioners; ++i) {
+            if (combination & (1 << i)) {
+                total_cost += air_conditioners[i][3];
+                for (int stall = air_conditioners[i][0]; stall <= air_conditioners[i][1]; ++stall) {
+                    current_stall_temperatures[stall] -= air_conditioners[i][2];
+                }
             }
         }
 
-        if (isValid(copyOfStalls))
-        lowest_cost = min(lowest_cost, current_cost);
+        if (is_completely_cooled(current_stall_temperatures)) {
+            minimum_cost = min(minimum_cost, total_cost);
+        }
     }
 
-    cout << lowest_cost << "\n";
+    cout << minimum_cost << endl;
     return 0;
 }

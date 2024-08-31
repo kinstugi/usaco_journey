@@ -1,58 +1,139 @@
 #include <bits/stdc++.h>
+
 using namespace std;
+
 
 int n, m, k;
 
-void setIO(string name = "") {
-    ios_base::sync_with_stdio(0);
-    cin.tie(0);
-    if (name.size()) {
-        freopen((name + ".in").c_str(), "r", stdin);
-        freopen((name + ".out").c_str(), "w", stdout);
-    }
+
+/**
+
+ * @return whether it's possible to construct a
+
+ * valid ordering with given fixed elements
+
+ */
+
+bool check(vector<int> order, vector<int> &hierarchy) {
+
+	vector<int> cow_to_pos(n, -1);
+
+
+	for (int i = 0; i < n; i++) {
+
+		if (order[i] != -1) { cow_to_pos[order[i]] = i; }
+
+	}
+
+
+	int h_idx = 0;
+
+	for (int i = 0; i < n && h_idx < m; i++) {
+
+		if (cow_to_pos[hierarchy[h_idx]] != -1) {
+
+			// we know the next cow has to be in front of it
+
+
+			if (i > cow_to_pos[hierarchy[h_idx]]) { return false; }
+
+
+			i = cow_to_pos[hierarchy[h_idx]];
+
+			h_idx++;
+
+		} else {
+
+			while (i < n && order[i] != -1) { i++; }
+
+
+			// run out of places
+
+			if (i == n) { return false; }
+
+
+			order[i] = hierarchy[h_idx];
+
+			cow_to_pos[hierarchy[h_idx]] = i;
+
+			h_idx++;
+
+		}
+
+	}
+
+
+	return true;
+
 }
 
-bool check(vector<int> &order, vector<int> &hierarchy){
-    vector<int> cow_to_pos(n+1, -1);
-    for (int i = 1; i <= n; ++i){
-        if (order[i] != -1) { cow_to_pos[order[i]] = i; }
-    }
-
-    int h_idx = 0;
-    
-    return true;
-}
 
 int main() {
-    setIO("milkorder");
-   
-    vector<int> hierachy(m);
 
-    for (int i = 0; i < m; ++i)
-    cin >> hierachy[i];
+	freopen("milkorder.in", "r", stdin);
 
-    vector<int> order(n+1, -1);
+	freopen("milkorder.out", "w", stdout);
 
-    for (int i = 0; i < k; ++i){
-        int cow, pos;
-        cin >> cow >> pos;
-        order[pos] = cow;
+	cin >> n >> m >> k;
 
-        if (cow == 1){
-            cout << pos << '\n';
-            return 0;
-        }
-    }
 
-    for (int i = 1; i <= n; ++i){
-        if (order[i] == -1){
-            order[i] = 1;
-            if (check(order, hierachy, n)){
-                cout << i << '\n';
-                break;
-            }
-            order[i] = -1;
-        }
-    }
-    return 0;
+	vector<int> hierarchy(m);
+
+	for (int i = 0; i < m; i++) {
+
+		cin >> hierarchy[i];
+
+		hierarchy[i]--;
+
+	}
+
+
+	vector<int> order(n, -1);
+
+
+	for (int i = 0; i < k; i++) {
+
+		int cow, pos;
+
+		cin >> cow >> pos;
+
+
+		order[--pos] = --cow;
+
+
+		if (cow == 0) {  // already fixed, nothing we can do
+
+			cout << pos + 1 << endl;
+
+			return 0;
+
+		}
+
+	}
+
+
+	for (int i = 0; i < n; i++) {
+
+		// if already fixed, skip
+
+		if (order[i] == -1) {
+
+			// try placing cow 1 @ position i
+
+			order[i] = 0;
+
+			if (check(order, hierarchy)) {
+
+				cout << i + 1 << endl;
+
+				break;
+
+			}
+
+			order[i] = -1;
+
+		}
+
+	}
+
 }

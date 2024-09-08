@@ -1,7 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-map<string, vector<string>> graph;
+int N = 8;
+vector<vector<int>> graph(8);
 set<string> seen;
 
 void setIO(string name = "") {
@@ -18,49 +19,49 @@ int main(){
 
     string cows[8] = {"Bessie", "Buttercup", "Belinda", "Beatrice", "Bella", "Blue", "Betsy", "Sue"};
     sort(cows, cows + 8);
+    unordered_map<string, int> cow_inds;
 
-    for (string cow: cows){
-        graph[cow];
-    }
+    for (int i = 0; i < N; i++){ cow_inds[cows[i]] = i; }
 
     int n;
     cin >> n;
     string cowA, cowB, tmp;
     for (int i = 0; i < n; i++){
         cin >> cowA >> tmp >> tmp >> tmp >> tmp >> cowB;
+        int c1 = cow_inds[cowA], c2 = cow_inds[cowB];
         
-        if (cowA < cowB)
-        graph[cowA].push_back(cowB);
-        else
-        graph[cowB].push_back(cowA);
+        graph[c1].push_back(c2);
+        graph[c2].push_back(c1);
     }
 
-    vector<vector<string>> order;
-    for(string cow: cows){
-        if (graph[cow].size() > 1){
-            string mn = min(graph[cow][0], graph[cow][1]);
-            string mx = max(graph[cow][1], graph[cow][0]);
-            order.push_back({mn, cow, mx});
-            // seen.insert(cow); seen.insert(mx); seen.insert(mn);
-        }else if (graph[cow].size() == 1){
-            order.push_back({cow, graph[cow][0]});
-        }else{
-            order.push_back({cow});
-        }
-    }
+    vector<bool> added(N, false);
+    vector<int> order;
 
-    sort(order.begin(), order.end(), [&](vector<string> &a, vector<string> &b){ 
-        if (a[0] == b[0]){
-            return a.size() > b.size();
-        }
-        return a[0] < b[0];     
-    });
-    for (vector<string> &v: order){
-        for (string s: v){
-            if (seen.count(s)) continue;
-            cout << s << endl;
-            seen.insert(s);
+    for (int c = 0; c < N; c++){
+        if (!added[c] && graph[c].size() < 2){
+            added[c] = true;
+            order.push_back(c);
+
+            if (graph[c].size() == 1){
+                int prev = c;
+                int at = graph[c][0];
+                while (graph[at].size() == 2){
+                    added[at] = true;
+                    order.push_back(at);
+
+                    int a = graph[at][0];
+                    int b = graph[at][1];
+                    int tmp_at = a == prev ? b : a;
+                    prev  = at;
+                    at = tmp_at;
+                }
+                added[at] = true;
+                order.push_back(at);
+            }
         }
     }
+    
+    for (int c: order)
+    cout << cows[c] << endl;
     return 0;
 }

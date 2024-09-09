@@ -23,25 +23,20 @@ int main(){
         graph[b].push_back(a);
     }
 
-    vector<int> colors(N+1, 1);
     for (int node = 1; node <= N; node++){
-        for (int nei: graph[node]){
+        int colors_available[5] = {0, 1, 2, 3, 4};
+        for (int nei: graph[node]){ colors_available[field_color[nei]] = 0; }
 
-            if (colors[nei] == colors[node]){
-                colors[nei]++;
-           
-
-                for (int j = 1; j < node; j++){
-                    for (int i: graph[j]){
-                        if (colors[i] == colors[j]) { colors[nei]++; }
-                    }
-                }
+        for (int color: colors_available){
+            if (color){
+                field_color[node] = color;
+                break;
             }
         }
     }
 
-    for (int i = 1; i <= N; i++)
-    cout << colors[i];
-    cout << endl;
+    for (int i = 1; i <= N; i++){
+        cout << field_color[i];
+    }
     return 0;
 }

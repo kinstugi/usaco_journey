@@ -1,101 +1,60 @@
-#include <cstdio>
-#include <vector>
-#include <algorithm>
+#include <bits/stdc++.h>
+using namespace std;
 
-#define NMAX 100000
-
-int n;
-long long x[NMAX];
-long long y[NMAX];
-#define infinite 1000000000
-
-struct Analysis {
-  long long area;
-  std::vector<std::vector<int> > borders;
-};
-
-Analysis analyze(std::vector<int> indicesToSkip) {
-  long long minX = infinite, minY = infinite, maxX = -infinite, maxY = -infinite;
-  for (int i = 0; i < n; i++) {
-    bool skip = false;
-    for (int j = 0; j < indicesToSkip.size(); j++) {
-      if (indicesToSkip[j] == i) {
-	skip = true;
-      }
-    }
-
-    if (skip) continue;
-
-    minX = std::min(minX, x[i]);
-    maxX = std::max(maxX, x[i]);
-    minY = std::min(minY, y[i]);
-    maxY = std::max(maxY, y[i]);
-  }
-
-  Analysis a;
-  a.area = (maxX - minX) * (maxY - minY);
-
-  std::vector<int> up, down, left, right;
-
-  for (int i = 0; i < n; i++) {
-    bool skip = false;
-    for (int j = 0; j < indicesToSkip.size(); j++) {
-      if (indicesToSkip[j] == i) {
-	skip = true;
-      }
-    }
-
-    if (skip) continue;
-
-    if (x[i] == minX) left.push_back(i);
-    if (x[i] == maxX) right.push_back(i);
-    if (y[i] == minY) up.push_back(i);
-    if (y[i] == maxY) down.push_back(i);
-  } 
-
-  if (up.size() <= 3) a.borders.push_back(up);
-  if (down.size() <= 3) a.borders.push_back(down);
-  if (left.size() <= 3) a.borders.push_back(left);
-  if (right.size() <= 3) a.borders.push_back(right);
-
-  return a;
+void setIO(string name = "") {
+	ios_base::sync_with_stdio(0);
+	cin.tie(0);
+	if (!name.empty()) {
+		freopen((name + ".in").c_str(), "r", stdin);
+		freopen((name + ".out").c_str(), "w", stdout);
+	}
 }
 
-int main() {
-  freopen("reduce.in", "r", stdin);
-  freopen("reduce.out", "w", stdout);
-    
-  scanf("%d", &n);
-  for (int i = 0; i < n; i++) {
-    scanf("%lld", &x[i]);
-    scanf("%lld", &y[i]);
+
+int main(){
+  setIO("reduce");
+  int n;
+  cin >> n;
+  
+  vector<pair<pair<int, int>, int>> v(n);
+  vector<pair<int, int>> p(n);
+
+  for (int i = 0; i < n; i++) { 
+    cin >> v[i].first.first >> v[i].first.second;
+    v[i].second = i;
+    p[i] = v[i].first;
   }
 
-  Analysis a = analyze(std::vector<int>());
-  long long bestArea = a.area;
+  int mn = INT_MAX;
+  vector<int> x, y;
 
-  for (std::vector<int> pointsOnBorder : a.borders) {
-    Analysis smallerAnalysis = analyze(pointsOnBorder);
-    bestArea = std::min(bestArea, smallerAnalysis.area);
-    for (std::vector<int> pointsOnBorder2 : smallerAnalysis.borders) {
-      if (pointsOnBorder2.size() + pointsOnBorder.size() <= 3) {
-	for (int p : pointsOnBorder) {
-	  pointsOnBorder2.push_back(p);
-	}
-	Analysis analysis3 = analyze(pointsOnBorder2);
-	bestArea = std::min(bestArea, analysis3.area);
-	for (std::vector<int> pointsOnBorder3 : analysis3.borders) {
-	  if (pointsOnBorder2.size() + pointsOnBorder3.size() <= 3) {
-	    for (int p : pointsOnBorder2) {
-	      pointsOnBorder3.push_back(p);
-	    }
-	    Analysis analysis4 = analyze(pointsOnBorder3);
-	    bestArea = std::min(bestArea, analysis4.area);
-	  }
-	}
-      }
-    }
-  }
+  sort(v.begin(), v.end());
+  for (const auto &item: v) { x.emplace_back(item.second); }
 
-  printf("%lld\n", bestArea);
+  sort(v.begin(), v.end(), [](pair<pair<int, int>, int> &a, pair<pair<int, int>, int> &b){
+    return a.first.second < b.first.second;
+  });
+  for (int i = 0; i < n; i++) { y.emplace_back(v[i].second); }
+
+  for (int i = 0; i < 4; i++)
+    for (int j = 0; j < 4; j++)
+      for (int k = 0; k < 4; k++)
+        for (int l = 0; l < 4; l++){
+          if (i+j > 3 || k+l > 3) continue;
+
+          int min_x = p[x[i]].first, max_x = p[x[n-1-j]].first, min_y = p[y[k]].second, max_y = p[y[n-1-l]].second;
+          int cnt = 0;
+
+          for (int m = 0; m < n; m++){
+            if (p[m].first >= min_x && p[m].first <= max_x && p[m].second >= min_y && p[m].second <= max_y) continue;
+            cnt++;
+          }
+
+          if (cnt <= 3){
+            mn = min(mn, (max_x - min_x) * (max_y - min_y));
+          }
+        }
+  
+  cout << mn << endl;
+  return 0;
 }

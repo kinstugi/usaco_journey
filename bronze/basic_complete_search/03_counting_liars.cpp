@@ -14,8 +14,31 @@ void setIO(string name = "") {
 int main(){
     setIO();
     int n;
-    cin >> n;
-    int lb = INT_MIN, hb = INT_MAX;
-    
+	cin >> n;
+	vector<pair<int, char>> arr(n);
+
+	for (int i = 0; i < n; i++) { cin >> arr[i].second >> arr[i].first; }
+
+	//we will consider the ith cow is telling the truth
+	int ans = INT_MAX;
+	for (const pair<int, char> &cur_cow: arr){
+		int lb = INT_MIN, rb = INT_MAX;
+		if (cur_cow.second == 'G'){ lb = cur_cow.first;}
+		else{ rb = cur_cow.first; }
+
+		int cnt = 0;
+
+		for (const pair<int, char> &pp: arr){
+			int llb = INT_MIN, rrb= INT_MAX;
+			if (pp.second == 'G') { llb = pp.first;}
+			else{ rrb = pp.first; }
+
+			if ((lb <= llb && llb <= rb) || (llb <= lb && lb <= rrb)) {continue;}
+			cnt++;
+		}
+
+		ans = min(ans, cnt);
+	}
+	cout << ans << endl;
     return 0;
 }

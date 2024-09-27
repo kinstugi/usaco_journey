@@ -44,9 +44,19 @@ int main(){
         if (ch == '0') continue;
         // verify is this sick patient is probable patient zero
         
-        for (Contact &contact: contacts){
-            
+        int cnt = 0; 
+        bool flag = false;
+        for (const Contact &contact: contacts){
+            if (contact.cowA != cur_patient && contact.cowB != cur_patient) continue;
+
+            if (health_record[contact.cowA-1] == '1' && health_record[contact.cowB-1] == '1'){
+                if (cnt == 0) { patient_z++; }
+                flag = true;
+            }
+            cnt++;
         }
+
+        if (!flag) { patient_z++; }
     }
     return 0;
 }

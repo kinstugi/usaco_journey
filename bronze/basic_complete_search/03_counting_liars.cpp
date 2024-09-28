@@ -18,26 +18,27 @@ int main(){
 	vector<pair<int, char>> arr(n);
 
 	for (int i = 0; i < n; i++) { cin >> arr[i].second >> arr[i].first; }
+	sort(arr.begin(), arr.end());
 
-	//we will consider the ith cow is telling the truth
-	int ans = INT_MAX;
-	for (const pair<int, char> &cur_cow: arr){
-		int lb = INT_MIN, rb = INT_MAX;
-		if (cur_cow.second == 'G'){ lb = cur_cow.first;}
-		else{ rb = cur_cow.first; }
-
-		int cnt = 0;
-
-		for (const pair<int, char> &pp: arr){
-			int llb = INT_MIN, rrb= INT_MAX;
-			if (pp.second == 'G') { llb = pp.first;}
-			else{ rrb = pp.first; }
-
-			if ((lb <= llb && llb <= rb) || (llb <= lb && lb <= rrb)) {continue;}
-			cnt++;
+	vector<int> lying_left(n);
+	for (int i = 1; i < n; i++){
+		lying_left[i] += lying_left[i-1];
+		if (arr[i-1].second == 'L' && arr[i].first >= arr[i-1].first){
+			lying_left[i]++;
 		}
+	}
 
-		ans = min(ans, cnt);
+	vector<int> lying_right(n);
+	for (int i = n-2; i >-1; i--){
+		lying_right[i]+= lying_right[i+1];
+		if (arr[i+1].second == 'G' && arr[i].first <= arr[i+1].first){
+			lying_right[i]++;
+		}
+	}
+
+	int ans = n;
+	for (int i = 0; i < n; i++){
+		ans = min(ans, lying_left[i] + lying_right[i]);
 	}
 	cout << ans << endl;
     return 0;

@@ -24,10 +24,13 @@ void solve(){
         total += num; 
     }
 
+    ll div = total / max_lim;
+    if (total % max_lim) { div++; }
+    cout << max(div, mx) << endl;
 }
 
 int main(){
-    setIO();
+    setIO("test");
     int t;
     cin >> t;
 
